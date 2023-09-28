@@ -1,0 +1,67 @@
+Бригада 6
+1 Напишите запрос, который вывел бы для каждого заказа его номер, стоимость заказа в
+евро (1$=0.85 евро), имя покупателя и его рейтинг. Данные вывести для покупателей,
+размещенных в Лондоне и в Риме. После стоимости заказа вставьте поясняющую
+фразу – “евро”.
+  
+SELECT onum, amt*0.85, 'евро', cname, rating, city FROM ord, cust 
+where city in ('London','Rome') 
+
+2
+Выведите стоимости заказов, выполненных 4 и 5 Августа, в возрастающем порядке, а
+также имена продавцов и покупателей каждого заказа.
+
+select sname, cname, odate, amt from sal, cust, ord
+where cust.snum=sal.snum and ord.cnum=cust.cnum
+and (odate = '2022-08-04' or odate = '2022-08-05')
+order by amt asc
+
+3
+Напишите запрос, который вывел бы имена покупателей в алфавитном порядке,
+размещенных в Берлине и в Риме, и суммарные значения сделанных ими заказов.
+
+select cname, SUM(amt) from cust, ord where (cust.city = 'Berlin' or cust.city = 'Rome')
+and cust.cnum=ord.cnum group by cname order by cname asc
+
+4
+Выведите номера заказов, их стоимость и имена продавцов и покупателей, причем
+продавцы и покупатели должны размещаться в городах, чьи названия начинаются с
+букв, не попадающих в диапазон от L до R.
+
+select onum, amt, cname, sname from ord, cust, sal
+where not(REGEXP_LIKE (cust.city, '^[L-R]')and REGEXP_LIKE (sal.city, '^[L-R]'))
+and (ord.cnum=cust.cnum and cust.snum=sal.snum)
+
+5
+Напишите запрос, который выводит все пары номеров заказов, выполненные 3
+Августа. Исключите комбинации заказа с самим собой, а также дубликаты строк,
+выводящие пары в обратном порядке.
+
+SELECT DISTINCT
+CASE WHEN o1.onum < o2.onum THEN o1.onum ELSE o2.onum END AS onum1,
+CASE WHEN o1.onum < o2.onum THEN o2.onum ELSE o1.onum END AS onum2
+FROM
+ord o1
+JOIN
+ord o2 ON o1.onum < o2.onum
+WHERE
+MONTH(o1.odate) = 8
+AND DAY(o1.odate) = 3
+AND MONTH(o2.odate) = 8
+AND DAY(o2.odate) = 3;
+
+6
+С помощью подзапроса выведите имена всех продавцов, чьи покупатели имеют
+рейтинг меньше 300
+
+SELECT sname FROM sal where snum in (select snum from cust where rating <300);
+
+7
+Запросите общие суммы заказов для каждого продавца, у которого эта общая сумма
+меньше, чем максимальный заказ в таблице.
+
+select sname, SUM(amt)
+from sal, ord
+where sal.snum=ord.snum 
+group by sname 
+having (SUM(amt) <  (select MAX(amt) from ord))
