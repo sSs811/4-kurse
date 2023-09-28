@@ -1,0 +1,56 @@
+бригада 6
+
+Придумайте (сформулируйте) и напишите 5 заданий для соединения таблиц из 
+учебной базы данных (SAL, CUST, ORD) всеми возможными видами соединений 
+(Inner, Left [Outer], Right [Outer], Full [Outer] (в MySQL - UNION или 
+UNION ALL), Cross). Также напишите ответы на придуманные вами задания в 
+виде SQL-запросов. (Каждая бригада придумывает свои 5 заданий и ответы на них.)
+
+	1. Выведите всех покупки с именами покупателей и продавцов.
+
+SELECT 
+    cust.cname, sal.sname, ord.amt
+FROM
+    ord
+        INNER JOIN
+    cust ON ord.cnum = cust.cnum
+        INNER JOIN
+    sal ON sal.snum = ord.snum
+
+	2. Выведите всех покупателей и продавцов и их города
+
+SELECT 
+	sal.sname, sal.city, cust.cname, cust.city
+FROM
+    sal
+        LEFT JOIN
+    cust ON sal.snum = cust.snum
+
+	3. Выведите для каждой сделки дату, сумму и имя продовца
+
+SELECT 
+	sal.sname, ord.odate, ord.amt
+FROM
+    ord
+        RIGHT JOIN
+    sal ON sal.snum = ord.snum
+
+	4. Выведите все города из таблиц
+
+SELECT DISTINCT
+    city
+FROM
+    cust 
+UNION ALL SELECT DISTINCT
+    city
+FROM
+    sal
+
+	5. Выведиет все пары имен продавцов и покупателей 
+
+SELECT DISTINCT
+	sal.sname, cust.cname
+FROM
+    sal
+        CROSS JOIN
+    cust
