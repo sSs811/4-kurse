@@ -31,7 +31,8 @@ $var2 = "My friend is $var1";
 $var3 = 'My friend is $var1';
 // результаты отличаются тем, что в первом сслучае за счет двойных ковычек 
 // мы ссылаемся на var1, в отличие от второго варианта, где ссылки нет
-$var4 = "$var1";
+$var4 = &$var1;
+$var1 = "Bob";
 
 $color = "red";
 $size = "30px";
@@ -41,20 +42,6 @@ echo "<p style='color: $color; font-size: $size;'>$var1</p>
 <p style='color: $color; font-size: $size;'>$var3</p>
 <p style='color: $color; font-size: $size;'>$var4</p>";
 
-////////////////////////////////////////////////////////////////////////////////
-// после присваивания значения Боб:
-$var1 = "Bob";
-$var2 = "My friend is $var1";
-$var3 = 'My friend is $var1';
-$var4 = "$var1";
-
-$color = "blue";
-$size = "30px";
-
-echo "<p style='color: $color; font-size: $size;'>$var1</p>
-<p style='color: $color; font-size: $size;'>$var2</p>
-<p style='color: $color; font-size: $size;'>$var3</p>
-<p style='color: $color; font-size: $size;'>$var4</p>";
 
 ////////////////////////////////////////////////////////////////////////////////
 
