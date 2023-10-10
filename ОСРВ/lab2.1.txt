@@ -1,0 +1,212 @@
+#include <unistd.h>
+#include <signal.h>
+#include <semaphore.h>
+#include <math.h>
+#include <stdlib.h>
+#include <vingraph.h>
+#include <sys/ipc.h>
+#include <sys/mman.h>
+
+sem_t sem;
+
+struct tTask
+{
+    int x, y;
+} T;
+
+int x, y;
+int* direction; 
+
+void I()
+{
+    int p = Ellipse(420, 50, 60, 40, RGB(50, 100, 150));
+    float t = 0.0;
+
+    while (1)
+    {
+        switch (*direction)
+        {
+        case 0: // вверх
+            x = (int)(155 * cos(t) + 120);
+            y = (int)(122 * sin(t) + 240);
+            break;
+        case 1: // вниз
+            x = (int)(155 * cos(t) + 120);
+            y = (int)(-122 * sin(t) + 240);
+            break;
+        case 2: // влево
+            x = (int)(-155 * cos(t) + 120);
+            y = (int)(122 * sin(t) + 240);
+            break;
+        case 3: // вправо
+            x = (int)(155 * cos(t) + 460);
+            y = (int)(122 * sin(t) + 240);
+            break;
+        }
+
+        MoveTo(x, y, p), usleep(20000);
+        t += 0.05;
+    }
+}
+
+void A()
+{
+    int p = Pixel(20, 40);
+    float t = 0.0;
+    while (1)
+    {
+        x = (int)(100 * cos(t) + 320);
+        y = (int)(53 * sin(t) + 240);
+        MoveTo(x, y, p), usleep(20000);
+        t += 0.05;
+    }
+}
+
+void B()
+{
+    int p = Line(70, 50, 130, 90);
+    float t = 0.0;
+    while (1)
+    {
+        x = (int)(200 * cos(t) + 320);
+        y = (int)(50 * sin(t) + 240);
+        MoveTo(x, y, p), usleep(20000);
+        t += 0.05;
+    }
+}
+
+void C()
+{
+    tPoint p1[] = {{140, 100}, {200, 40}, {200, 100}, {155, 55}};
+    int p = Polyline(p1, 4);
+    float t = 0.0;
+    while (1)
+    {
+        x = (int)(300 * cos(t) + 320);
+        y = (int)(140 * sin(t) + 240);
+        MoveTo(x, y, p), usleep(20000);
+        t += 0.05;
+    }
+}
+
+void D()
+{
+    int p = Rect(210, 40, 60, 60);
+    float t = 0.0;
+    while (1)
+    {
+        x = (int)(103 * cos(t) + 320);
+        y = (int)(204 * sin(t) + 240);
+        MoveTo(x, y, p), usleep(20000);
+        t += 0.05;
+    }
+}
+
+void F()
+{
+    tPoint p2[] = {{280, 100}, {310, 40}, {340, 100}};
+
+    int p = Polygon(p2, 3);
+    float t = 0.0;
+    while (1)
+    {
+        x = (int)(153 * cos(t) + 320);
+        y = (int)(404 * sin(t) + 240);
+        MoveTo(x, y, p), usleep(20000);
+        t += 0.05;
+    }
+}
+
+void G()
+{
+    int p = Ellipse(420, 50, 60, 40);
+    float t = 0.0;
+    while (1)
+    {
+        x = (int)(284 * cos(t) + 320);
+        y = (int)(200 * sin(t) + 240);
+        MoveTo(x, y, p), usleep(20000);
+        t += 0.05;
+    }
+}
+
+int main()
+{
+    ConnectGraph();
+    sem_init(&sem, 0, 0);
+    char c;
+
+  
+    direction = (int*) mmap(0, sizeof(int), PROT_READ + PROT_WRITE, MAP_ANON + MAP_SHARED, -1, 0);
+    *direction = 0; 
+
+    pid_t pid = fork();
+    
+    if (pid == 0)
+    {
+        I();
+        exit(0);
+    }
+
+    pid = fork();
+    if (pid == 0)
+    {
+        A();
+        exit(0);
+    }
+
+    pid = fork();
+    if (pid == 0)
+    {
+        B();
+        exit(0);
+    }
+
+    pid = fork();
+    if (pid == 0)
+    {
+        C();
+        exit(0);
+    }
+
+    pid = fork();
+    if (pid == 0)
+    {
+        D();
+        exit(0);
+    }
+
+    pid = fork();
+    if (pid == 0)
+    {
+        F();
+        exit(0);
+    }
+
+    pid = fork();
+    if (pid == 0)
+    {
+        G();
+        exit(0);
+    }
+
+    while (1)
+    {
+        c = InputChar();
+        if ((c == 0) || (c == 'q'))
+            break;
+        if (c == 'w')
+            *direction = 0; 
+        if (c == 's')
+            *direction = 1;
+        if (c == 'a')
+            *direction = 2;
+        if (c == 'd')
+            *direction = 3;
+        T.x = x, T.y = y, sem_post(&sem);
+    }
+
+
+    CloseGraph();
+    return 0;
+}
