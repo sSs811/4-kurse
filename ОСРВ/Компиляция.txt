@@ -1,0 +1,7 @@
+lab 2.1:
+g++ lab2.1.cpp -lvg -lm -o lab2.1.demo
+./lab2.1.demo
+
+lab 2.2:
+g++ lab2.2.cpp -lvg -lm -o lab2.2.demo
+./lab2.2.demo
