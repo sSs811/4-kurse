@@ -1,0 +1,45 @@
+#include <stdio.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/neutrino.h>
+#include <sys/netmgr.h>
+
+
+int main()
+{
+    sigset_t set;
+
+    int manager, manager2;
+    int manager_chid = ChannelCreate(0);
+    int manager2_chid;
+    int pid = getpid(), pid2;
+    int fd = open("/dev/shmem/NAME", O_RDWR);
+
+    read(fd, &pid2, 4);
+    read(fd, &manager2_chid, 4);
+
+    printf("Reading %d %d\n", pid2, manager2_chid);
+    manager = ConnectAttach(0, 0, manager_chid, 0, 0);
+
+    printf("Manager chid: %d\n", manager);
+    manager2 = ConnectAttach(ND_LOCAL_NODE, pid2, manager2_chid, 0, 0);
+
+    printf("Manager2 chid: %d\n", manager2);
+    printf("Await for interrrupt\n");
+
+    MsgSend(manager2, 0, 0, 0, 0);
+        if(InterruptWait(0, 0) != -1)
+
+    printf("Interrupt successful recieved!\n");
+    printf("Await for signal\n");
+
+    sigemptyset(&set);
+    sigaddset(&set, SIGUSR1);
+
+    MsgSend(manager2, 0, 0, 0, 0);
+    
+    int sig = 0;
+        if(sigwait(&set, &sig) == 0)
+    printf("Signal %d successful recieved!\n", sig);
+    return 0;
+}

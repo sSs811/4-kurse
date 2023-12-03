@@ -1,0 +1,43 @@
+#include <iostream>
+#include <inttypes.h>
+#include <malloc.h>
+#include <sys/neutrino.h>
+#include <sys/syspage.h>
+#define CYCLES 100
+
+int main()
+{
+    char *alloca_test, *malloc_test;
+    uint64_t start, stop, cps;
+    uint64_t alloca_time = 0;
+    for(int i = 0; i < CYCLES; i++)
+    {
+        start = ClockCycles();
+        alloca_test = (char *)alloca(100);
+        stop = ClockCycles();
+        alloca_time += stop - start;
+    }
+
+std::cout << "Alloca avg. cycles: " << alloca_time / CYCLES <<
+std::endl;
+
+cps = SYSPAGE_ENTRY(qtime)->cycles_per_sec;
+std::cout << "Alloca elapsed time: " <<(double)(alloca_time / CYCLES) / cps << std::endl;
+uint64_t malloc_time = 0;
+    
+    for(int i = 0; i < CYCLES; i++)
+    {
+        start = ClockCycles();
+        malloc_test = (char *)malloc(100 * sizeof(char));
+        stop = ClockCycles();
+        malloc_time += stop - start;
+        free(malloc_test);
+    }
+
+std::cout << "Malloc avg. cycles: " << malloc_time / CYCLES <<
+std::endl;
+
+cps = SYSPAGE_ENTRY(qtime)->cycles_per_sec;
+std::cout << "Malloc avg. elapsed time: " <<(double)(malloc_time / CYCLES) / cps << std::endl;
+return EXIT_SUCCESS;
+}

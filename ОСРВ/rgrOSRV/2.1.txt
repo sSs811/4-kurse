@@ -1,0 +1,40 @@
+#include <stdio.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/neutrino.h>
+#include <sys/netmgr.h>
+
+
+int main()
+{
+    struct sigevent event;
+
+    int manager_chid = ChannelCreate(0);
+    int manager = ConnectAttach(ND_LOCAL_NODE, 0, manager_chid, 0, 0);
+    int pid = getpid(), pid2;
+    int fd = open("/dev/shmem/NAME", O_CREAT+O_RDWR, 8000);
+
+    printf("Writing %d %d %d\n", manager, pid, manager_chid);
+    write(fd, &pid, 4);
+    write(fd, &manager_chid, 4);
+
+    int rcvid = MsgReceive(manager_chid, 0, 0, 0);
+
+    MsgReply(rcvid, 1, 0, 0);
+    sleep(1);
+
+    SIGEV_INTR_INIT(&event);
+        if(MsgDeliverEvent(rcvid, &event) != -1)
+
+    printf("Interrupt send.\n");
+    rcvid = MsgReceive(manager_chid, 0, 0, 0);
+
+    MsgReply(rcvid, 1, 0, 0);
+    sleep(1);
+
+    SIGEV_SIGNAL_INIT(&event, SIGUSR1);
+        if(MsgDeliverEvent(rcvid, &event) != -1)
+        
+    printf("Signal send.\n");
+    return 0;
+}
